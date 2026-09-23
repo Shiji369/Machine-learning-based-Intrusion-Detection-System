@@ -404,6 +404,16 @@ Add the verified results from your latest evaluation below.
 | Isolation Forest   | 79.69% | 97.14% | 66.27% | 78.79% |
 | Combined Detection | 85.09% | 96.63% | 76.47% | 85.38% |
 
+### Combined Model Confusion Matrix
+
+| Actual / Predicted | Normal (0) | Attack (1) |
+|--------------------|-----------|------------|
+| Normal (0)         | 9,369     | 342        |
+| Attack (1)         | 3,019     | 9,814      |
+
+Rows represent actual classes, and columns represent predicted classes.
+Class 0 = Normal and Class 1 = Attack.
+
 **Evaluation note:** Clearly state which dataset split was used, how labels were mapped, and whether the values are from binary classification or another evaluation task. Do not mix training metrics with test metrics.
 
 ---
