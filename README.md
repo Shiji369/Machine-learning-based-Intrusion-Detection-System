@@ -445,11 +445,5 @@ Only test systems and network traffic that you own or have explicit authorizatio
 
 ---
 
-## Author
-
-**Shijimol S**
-
-B.Sc. Cyber Forensics
-Advanced Diploma in Cyber Security & Ethical Hacking
 
 College Mini Project — Machine Learning Based Intrusion Detection System
