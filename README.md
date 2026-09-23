@@ -445,5 +445,3 @@ Only test systems and network traffic that you own or have explicit authorizatio
 
 ---
 
-
-College Mini Project — Machine Learning Based Intrusion Detection System
