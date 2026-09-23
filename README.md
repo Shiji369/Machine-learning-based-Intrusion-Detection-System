@@ -400,9 +400,9 @@ Add the verified results from your latest evaluation below.
 
 | Model              |           Accuracy |          Precision |             Recall |           F1-score |
 | ------------------ | -----------------: | -----------------: | -----------------: | -----------------: |
-| Random Forest      | 77.12% | 96.69% | 61.96% | 75.50% |
+| Random Forest      | 77.27% | 96.67% | 62.21% | 75.70% |
 | Isolation Forest   | 79.69% | 97.14% | 66.27% | 78.79% |
-| Combined Detection | 85.10% | 96.65% | 79.47% | 85.39% |
+| Combined Detection | 85.09% | 96.63% | 76.47% | 85.38% |
 
 **Evaluation note:** Clearly state which dataset split was used, how labels were mapped, and whether the values are from binary classification or another evaluation task. Do not mix training metrics with test metrics.
 
