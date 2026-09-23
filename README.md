@@ -145,7 +145,7 @@ The preprocessing stage includes:
 1. Loading the dataset.
 2. Separating the input features and target label.
 3. Removing the difficulty-level field from the model input.
-4. Converting the original labels into the required classification labels.
+4. Converting the original labels into binary classes: Normal (0) and Attack (1).
 5. Encoding categorical features.
 6. Scaling numerical features where required by the implementation.
 7. Preparing the processed data for model training and prediction.
@@ -396,7 +396,7 @@ The following metrics can be used to assess classification performance:
 
 ### Results
 
-Add the verified results from your latest evaluation below.
+The following table presents the model performance results obtained during evaluation on the NSL-KDD test dataset.
 
 | Model              |           Accuracy |          Precision |             Recall |           F1-score |
 | ------------------ | -----------------: | -----------------: | -----------------: | -----------------: |
