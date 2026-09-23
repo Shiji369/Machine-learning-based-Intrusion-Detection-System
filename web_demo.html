@@ -1,0 +1,811 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML-IDS - Live Flow Analyzer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fa;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #123b67;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #174a7c;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            background: white;
+        }
+
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-field input {
+            width: auto;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button,
+        .download-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .primary-btn {
+            background: #1769aa;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #105386;
+        }
+
+        .preset-btn {
+            background: #e5edf5;
+            color: #174a7c;
+        }
+
+        .preset-btn:hover {
+            background: #d2e1f0;
+        }
+
+        .download-btn {
+            background: #16803c;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            background: #11652f;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #dbe4ee;
+            display: none;
+        }
+
+        .normal-result {
+            border-left: 6px solid #16a34a;
+        }
+
+        .attack-result {
+            border-left: 6px solid #dc2626;
+        }
+
+        .error {
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .help-text {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            border: 1px solid #dbe4ee;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-wrap: anywhere;
+        }
+
+        .metric-card h3 {
+            color: #174a7c;
+            margin-top: 0;
+            font-size: 17px;
+        }
+
+        .metric-value {
+            font-size: 14px;
+            margin: 8px 0;
+        }
+
+        .metric-value strong {
+            color: #0f172a;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 400px;
+            background: white;
+        }
+
+        th,
+        td {
+            padding: 11px;
+            border: 1px solid #dbe4ee;
+            text-align: center;
+        }
+
+        th {
+            background: #eaf1f8;
+            color: #174a7c;
+        }
+
+        .status {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        .status-success {
+            color: #15803d;
+        }
+
+        .status-error {
+            color: #b91c1c;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 12px;
+            }
+
+            .form-grid,
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>ML-IDS</h1>
+    <p class="subtitle">Machine Learning Based Intrusion Detection System</p>
+
+    <!-- MANUAL FLOW ANALYZER -->
+    <section class="card">
+        <h2>1. Manual Network Flow Analyzer</h2>
+
+        <p class="help-text">
+            Enter network-flow features and submit them for analysis.
+            Presets are example inputs for demonstration and do not represent
+            live network traffic.
+        </p>
+
+        <div class="buttons">
+            <button type="button" class="preset-btn" onclick="loadPreset('normal')">
+                Normal
+            </button>
+            <button type="button" class="preset-btn" onclick="loadPreset('neptune')">
+                Neptune
+            </button>
+            <button type="button" class="preset-btn" onclick="loadPreset('smurf')">
+                Smurf
+            </button>
+            <button type="button" class="preset-btn" onclick="loadPreset('satan')">
+                Satan
+            </button>
+            <button type="button" class="preset-btn" onclick="loadPreset('guess')">
+                Guess_passwd
+            </button>
+        </div>
+
+        <form id="flowForm">
+            <div class="form-grid" style="margin-top: 20px;">
+
+                <div class="field">
+                    <label for="protocol_type">Protocol Type</label>
+                    <select id="protocol_type" name="protocol_type">
+                        <option value="tcp">TCP</option>
+                        <option value="udp">UDP</option>
+                        <option value="icmp">ICMP</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="flag">Connection Flag</label>
+                    <select id="flag" name="flag">
+                        <option value="SF">SF</option>
+                        <option value="S0">S0</option>
+                        <option value="REJ">REJ</option>
+                        <option value="RSTR">RSTR</option>
+                        <option value="RSTO">RSTO</option>
+                        <option value="SH">SH</option>
+                        <option value="S1">S1</option>
+                        <option value="S2">S2</option>
+                        <option value="S3">S3</option>
+                        <option value="OTH">OTH</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="src_bytes">Source Bytes</label>
+                    <input type="number" id="src_bytes" name="src_bytes"
+                           min="0" value="181" required>
+                </div>
+
+                <div class="field">
+                    <label for="dst_bytes">Destination Bytes</label>
+                    <input type="number" id="dst_bytes" name="dst_bytes"
+                           min="0" value="5450" required>
+                </div>
+
+                <div class="field">
+                    <label for="count">Connection Count</label>
+                    <input type="number" id="count" name="count"
+                           min="0" value="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="srv_count">Service Count</label>
+                    <input type="number" id="srv_count" name="srv_count"
+                           min="0" value="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="serror_rate">SYN Error Rate (0–1)</label>
+                    <input type="number" id="serror_rate" name="serror_rate"
+                           min="0" max="1" step="0.01" value="0" required>
+                </div>
+
+                <div class="field">
+                    <label for="srv_serror_rate">Service SYN Error Rate (0–1)</label>
+                    <input type="number" id="srv_serror_rate" name="srv_serror_rate"
+                           min="0" max="1" step="0.01" value="0" required>
+                </div>
+
+                <div class="field">
+                    <label for="same_srv_rate">Same Service Rate (0–1)</label>
+                    <input type="number" id="same_srv_rate" name="same_srv_rate"
+                           min="0" max="1" step="0.01" value="1" required>
+                </div>
+
+                <div class="field">
+                    <label for="diff_srv_rate">Different Service Rate (0–1)</label>
+                    <input type="number" id="diff_srv_rate" name="diff_srv_rate"
+                           min="0" max="1" step="0.01" value="0" required>
+                </div>
+
+                <div class="field">
+                    <label for="logged_in">Login Status</label>
+                    <select id="logged_in" name="logged_in">
+                        <option value="0">Not logged in</option>
+                        <option value="1">Successfully logged in</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="service">Service</label>
+                    <select id="service" name="service">
+                        <option value="http">HTTP</option>
+                        <option value="private">Private</option>
+                        <option value="domain_u">Domain</option>
+                        <option value="ftp">FTP</option>
+                        <option value="smtp">SMTP</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="primary-btn" id="analyzeBtn">
+                    Analyze Flow
+                </button>
+                <button type="reset" class="preset-btn">
+                    Reset
+                </button>
+            </div>
+        </form>
+
+        <div id="flowError" class="error"></div>
+        <div id="flowResult" class="result-box"></div>
+    </section>
+
+    <!-- CSV UPLOAD AND MODEL METRICS -->
+    <section class="card">
+        <h2>2. CSV Dataset Evaluation</h2>
+
+        <p class="help-text">
+            Upload a CSV containing the 41 NSL-KDD feature columns and a
+            label column named <strong>attack_type</strong> or
+            <strong>label</strong>. The backend evaluates the dataset using
+            Random Forest, Isolation Forest, and the Combined model.
+        </p>
+
+        <form id="csvForm">
+            <div class="field">
+                <label for="csvFile">Choose CSV File</label>
+                <input type="file" id="csvFile" name="file"
+                       accept=".csv,text/csv" required>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="primary-btn" id="uploadBtn">
+                    Upload CSV and Evaluate
+                </button>
+            </div>
+        </form>
+
+        <div id="csvStatus" class="status"></div>
+        <div id="csvError" class="error"></div>
+
+        <div id="metricsSection" style="display: none;">
+            <h2 style="margin-top: 25px;">Model Performance Metrics</h2>
+
+            <p id="recordsAnalyzed"></p>
+
+            <div class="metrics-grid" id="metricsGrid"></div>
+
+            <h2 style="margin-top: 25px;">Combined Model Confusion Matrix</h2>
+
+            <p class="help-text">
+                Rows represent actual classes; columns represent predicted
+                classes. Class 0 = Normal and Class 1 = Attack.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Actual / Predicted</th>
+                        <th>Normal (0)</th>
+                        <th>Attack (1)</th>
+                    </tr>
+                    </thead>
+                    <tbody id="confusionBody"></tbody>
+                </table>
+            </div>
+
+            <a id="downloadLink" class="download-btn" href="#" style="display:none;">
+                Download Prediction CSV
+            </a>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // ---------------- MANUAL FLOW PRESETS ----------------
+
+    const presets = {
+        normal: {
+            protocol_type: "tcp",
+            flag: "SF",
+            src_bytes: 181,
+            dst_bytes: 5450,
+            count: 1,
+            srv_count: 1,
+            serror_rate: 0,
+            srv_serror_rate: 0,
+            same_srv_rate: 1,
+            diff_srv_rate: 0,
+            logged_in: 1,
+            service: "http"
+        },
+
+        neptune: {
+            protocol_type: "tcp",
+            flag: "S0",
+            src_bytes: 0,
+            dst_bytes: 0,
+            count: 500,
+            srv_count: 500,
+            serror_rate: 1,
+            srv_serror_rate: 1,
+            same_srv_rate: 1,
+            diff_srv_rate: 0,
+            logged_in: 0,
+            service: "private"
+        },
+
+        smurf: {
+            protocol_type: "icmp",
+            flag: "SF",
+            src_bytes: 0,
+            dst_bytes: 0,
+            count: 500,
+            srv_count: 500,
+            serror_rate: 0,
+            srv_serror_rate: 0,
+            same_srv_rate: 1,
+            diff_srv_rate: 0,
+            logged_in: 0,
+            service: "ecr_i"
+        },
+
+        satan: {
+            protocol_type: "tcp",
+            flag: "REJ",
+            src_bytes: 0,
+            dst_bytes: 0,
+            count: 100,
+            srv_count: 20,
+            serror_rate: 0.2,
+            srv_serror_rate: 0.2,
+            same_srv_rate: 0.2,
+            diff_srv_rate: 0.8,
+            logged_in: 0,
+            service: "private"
+        },
+
+        guess: {
+            protocol_type: "tcp",
+            flag: "SF",
+            src_bytes: 100,
+            dst_bytes: 200,
+            count: 10,
+            srv_count: 10,
+            serror_rate: 0,
+            srv_serror_rate: 0,
+            same_srv_rate: 1,
+            diff_srv_rate: 0,
+            logged_in: 0,
+            service: "ftp"
+        }
+    };
+
+    function loadPreset(name) {
+        const preset = presets[name];
+        if (!preset) return;
+
+        Object.keys(preset).forEach(function (key) {
+            const field = document.getElementById(key);
+            if (field) field.value = preset[key];
+        });
+
+        document.getElementById("flowResult").style.display = "none";
+        document.getElementById("flowError").style.display = "none";
+    }
+
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.style.display = "block";
+    }
+
+    function hideElement(elementId) {
+        document.getElementById(elementId).style.display = "none";
+    }
+
+    function getFlowData() {
+        const form = document.getElementById("flowForm");
+        const formData = new FormData(form);
+        const data = {};
+
+        formData.forEach(function (value, key) {
+            const numericFields = [
+                "src_bytes", "dst_bytes", "count", "srv_count",
+                "serror_rate", "srv_serror_rate",
+                "same_srv_rate", "diff_srv_rate", "logged_in"
+            ];
+
+            data[key] = numericFields.includes(key) ? Number(value) : value;
+        });
+
+        return data;
+    }
+
+    document.getElementById("flowForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        hideElement("flowError");
+
+        const button = document.getElementById("analyzeBtn");
+        const resultBox = document.getElementById("flowResult");
+
+        button.disabled = true;
+        button.textContent = "Analyzing...";
+        resultBox.style.display = "none";
+
+        try {
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(getFlowData())
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || data.message || "Flow analysis failed.");
+            }
+
+            const rf = data.rf_prediction ?? data.random_forest_prediction ?? data.rf;
+            const iso = data.iso_prediction ?? data.isolation_forest_prediction ?? data.iso;
+            const combined = data.combined_prediction ?? data.combined;
+
+            function predictionText(value) {
+                if (value === undefined || value === null) return "Not provided";
+                if (typeof value === "string") return value;
+                if (value === 1 || value === -1) return "Attack";
+                if (value === 0) return "Normal";
+                return String(value);
+            }
+
+            const combinedText = predictionText(combined);
+            const isAttack = String(combinedText).toLowerCase().includes("attack");
+
+            resultBox.className = "result-box " + (isAttack ? "attack-result" : "normal-result");
+            resultBox.innerHTML = `
+                <h3>Analysis Result</h3>
+                <p><strong>Random Forest:</strong> ${escapeHTML(predictionText(rf))}</p>
+                <p><strong>Isolation Forest:</strong> ${escapeHTML(predictionText(iso))}</p>
+                <p><strong>Combined Verdict:</strong> ${escapeHTML(combinedText)}</p>
+                <p class="help-text">
+                    This is a model prediction from the submitted flow features,
+                    not a live packet capture.
+                </p>
+            `;
+            resultBox.style.display = "block";
+
+        } catch (error) {
+            showError("flowError", error.message || "Unable to connect to the ML-IDS server.");
+        } finally {
+            button.disabled = false;
+            button.textContent = "Analyze Flow";
+        }
+    });
+
+    // ---------------- CSV UPLOAD AND METRICS ----------------
+
+    document.getElementById("csvForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        hideElement("csvError");
+        hideElement("metricsSection");
+
+        const status = document.getElementById("csvStatus");
+        const button = document.getElementById("uploadBtn");
+        const fileInput = document.getElementById("csvFile");
+
+        if (!fileInput.files.length) {
+            showError("csvError", "Please choose a CSV file first.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+
+        if (!file.name.toLowerCase().endsWith(".csv")) {
+            showError("csvError", "Please upload a .csv file.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        button.disabled = true;
+        button.textContent = "Evaluating...";
+        status.textContent = "Uploading dataset and calculating metrics...";
+        status.className = "status";
+
+        try {
+            const response = await fetch("/upload_csv", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || data.message || "CSV evaluation failed.");
+            }
+
+            displayMetrics(data);
+
+            status.textContent = "Dataset evaluation completed.";
+            status.className = "status status-success";
+
+        } catch (error) {
+            status.textContent = "";
+            showError("csvError", error.message || "Unable to connect to the ML-IDS server.");
+        } finally {
+            button.disabled = false;
+            button.textContent = "Upload CSV and Evaluate";
+        }
+    });
+
+    function displayMetrics(data) {
+        const section = document.getElementById("metricsSection");
+        const grid = document.getElementById("metricsGrid");
+        const records = document.getElementById("recordsAnalyzed");
+        const confusionBody = document.getElementById("confusionBody");
+        const downloadLink = document.getElementById("downloadLink");
+
+        const metrics = data.metrics || data;
+
+        records.textContent =
+            "Records analyzed: " + (data.records_analyzed ?? data.total_records ?? "Not provided");
+
+        const modelNames = [
+            ["random_forest", "Random Forest"],
+            ["isolation_forest", "Isolation Forest"],
+            ["combined", "Combined Model"]
+        ];
+
+        grid.innerHTML = "";
+
+        modelNames.forEach(function ([key, label]) {
+            const model = metrics[key] || metrics[
+                key === "random_forest" ? "rf" :
+                key === "isolation_forest" ? "iso" : key
+            ];
+
+            if (!model) return;
+
+            const accuracy = model.accuracy;
+            const precision = model.precision;
+            const recall = model.recall;
+            const f1 = model.f1_score ?? model.f1;
+
+            const card = document.createElement("div");
+            card.className = "metric-card";
+
+            card.innerHTML = `
+                <h3>${escapeHTML(label)}</h3>
+                <p class="metric-value">Accuracy: <strong>${formatMetric(accuracy)}</strong></p>
+                <p class="metric-value">Precision: <strong>${formatMetric(precision)}</strong></p>
+                <p class="metric-value">Recall: <strong>${formatMetric(recall)}</strong></p>
+                <p class="metric-value">F1 Score: <strong>${formatMetric(f1)}</strong></p>
+            `;
+
+            grid.appendChild(card);
+        });
+
+        const combinedModel = metrics.combined || {};
+        const matrix = combinedModel.confusion_matrix || data.confusion_matrix;
+
+        confusionBody.innerHTML = "";
+
+        if (Array.isArray(matrix) && matrix.length >= 2) {
+            matrix.slice(0, 2).forEach(function (row, index) {
+                const tr = document.createElement("tr");
+                const label = index === 0 ? "Normal (0)" : "Attack (1)";
+                tr.innerHTML = `
+                    <th>${label}</th>
+                    <td>${escapeHTML(String(row[0] ?? "-"))}</td>
+                    <td>${escapeHTML(String(row[1] ?? "-"))}</td>
+                `;
+                confusionBody.appendChild(tr);
+            });
+        } else {
+            confusionBody.innerHTML =
+                "<tr><td colspan='3'>Confusion matrix was not returned by the server.</td></tr>";
+        }
+
+        const downloadUrl = data.download_url || data.csv_download_url;
+
+        if (downloadUrl) {
+            downloadLink.href = downloadUrl;
+            downloadLink.style.display = "inline-block";
+        } else {
+            downloadLink.style.display = "none";
+        }
+
+        section.style.display = "block";
+    }
+
+    function formatMetric(value) {
+        if (value === undefined || value === null || value === "") return "N/A";
+
+        const number = Number(value);
+        if (!Number.isFinite(number)) return String(value);
+
+        return (number * 100).toFixed(2) + "%";
+    }
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            }[character];
+        });
+    }
+</script>
+
+</body>
+</html>
